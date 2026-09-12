@@ -25,7 +25,7 @@ def load_env():
 def check_github_copilot():
     """Query GitHub API for Copilot & Codex usage."""
     token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
-    print("\n--- 🤖 GitHub Copilot & Codex Usage ---")
+    print("\n--- GitHub Copilot & Codex Usage ---")
     if not token:
         print("[!] GITHUB_TOKEN is not set.")
         print("    Add GITHUB_TOKEN to your .env file.")
@@ -82,7 +82,7 @@ def check_github_user(token):
 def check_antigravity():
     """Check Antigravity / Gemini model usage status."""
     api_key = os.getenv("ANTIGRAVITY_API_KEY") or os.getenv("GEMINI_API_KEY")
-    print("\n--- ⚡ Google Antigravity Usage ---")
+    print("\n--- Google Antigravity Usage ---")
     if not api_key:
         print("[i] ANTIGRAVITY_API_KEY not specified in .env.")
         print("    Using IDE / Workspace authenticated session.")
