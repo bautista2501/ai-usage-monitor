@@ -31,15 +31,18 @@ A standalone command-line tool to check remaining usage and quota for **GitHub C
    python check_usage.py
    ```
 
+## Repository
+
+* **GitHub URL:** [https://github.com/bautista2501/ai-usage-monitor](https://github.com/bautista2501/ai-usage-monitor)
+
 ---
 
-## How to Push to GitHub
-
-Initialize git and create a repository using the GitHub CLI:
+## Pushing Updates to GitHub
 
 ```bash
-git init
 git add .
-git commit -m "Initial commit of AI Usage Monitor"
-gh repo create ai-usage-monitor --public --source=. --remote=origin --push
+git commit -m "Update documentation"
+git push origin main
 ```
+
+
