@@ -43,6 +43,16 @@ echo "alias ai-usage='python /c/Users/leste/apps/ai-usage-monitor/check_usage.py
 source ~/.bashrc
 ```
 
+## Quota Mapping
+
+| Feature / VS Code Tab | Quota Metric in Output | Billing Behavior |
+| :--- | :--- | :--- |
+| **Codex Tab / Inline Autocomplete** | `Inline Suggestions (Codex)` | **Unlimited** (Included in subscription) |
+| **Copilot Chat Tab / Sidecar** | `Included Credits (Chat)` | **Monthly Quota** (Percentage used) |
+| **Google Antigravity Agent** | `Antigravity Session` | **Active IDE Session Quota** |
+
+---
+
 ## Repository
 
 * **GitHub URL:** [https://github.com/bautista2501/ai-usage-monitor](https://github.com/bautista2501/ai-usage-monitor)
