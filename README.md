@@ -27,9 +27,21 @@ A standalone command-line tool to check remaining usage and quota for **GitHub C
    Add your GitHub personal access token (`GITHUB_TOKEN`) to `.env`.
 
 3. **Run the script:**
-   ```bash
-   python check_usage.py
-   ```
+   * **Git Bash:**
+     ```bash
+     python /c/Users/leste/apps/ai-usage-monitor/check_usage.py
+     ```
+   * **PowerShell / CMD:**
+     ```powershell
+     python C:\Users\leste\apps\ai-usage-monitor\check_usage.py
+     ```
+
+### Optional: Git Bash Alias Setup
+Create a quick shortcut to run `ai-usage` from any folder in Git Bash:
+```bash
+echo "alias ai-usage='python /c/Users/leste/apps/ai-usage-monitor/check_usage.py'" >> ~/.bashrc
+source ~/.bashrc
+```
 
 ## Repository
 
