@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 AI Usage Monitor
-Checks separate usage metrics for Google Antigravity, Copilot Chat, and Codex / OpenAI API.
+Checks separate usage metrics for Google Antigravity, GitHub Copilot (Chat & Autocomplete), and Standalone OpenAI Codex.
 """
 
 import os
@@ -50,23 +50,25 @@ def check_antigravity():
     print(f"   - Daily Quota Reset:   Resets in {hours}h {minutes}m (UTC Midnight)")
 
 def check_copilot_chat():
-    """Check Copilot Chat monthly credits and reset window."""
-    print("\n2. COPILOT CHAT (Interactive Sidecar Assistant)")
+    """Check Copilot Chat credits and Inline Autocomplete usage."""
+    print("\n2. GITHUB COPILOT (Chat & Inline Autocomplete)")
     token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
     
     chat_credits = os.getenv("COPILOT_CHAT_CREDITS_USED", "47.0%")
+    inline_used = os.getenv("COPILOT_INLINE_USED", "0.0%")
     days_left = get_days_until_monthly_reset()
 
     if token:
         user_name = get_github_username(token)
         print(f"   - Account:             {user_name} (Active Subscription)")
     
-    print(f"   - Monthly Credits:     {chat_credits} Used (53.0% Remaining)")
+    print(f"   - Monthly Chat Credits:{chat_credits} Used (53.0% Remaining)")
+    print(f"   - Inline Autocomplete: {inline_used} Used (Unlimited)")
     print(f"   - Monthly Cycle Reset: Resets in {days_left} days")
 
 def check_codex():
-    """Check Codex API Key / OpenAI subscription or GitHub Codex engine capacity."""
-    print("\n3. CODEX (Real-Time Inline Autocomplete)")
+    """Check Standalone OpenAI Codex API Key status."""
+    print("\n3. OPENAI CODEX (Standalone API Account)")
     openai_key = os.getenv("OPENAI_API_KEY") or os.getenv("CODEX_API_KEY")
 
     if openai_key and openai_key.startswith("sk-"):
@@ -88,10 +90,8 @@ def check_codex():
         except Exception as e:
             print(f"   - OpenAI Status:       Key Configured ({openai_key[:4]}...{openai_key[-4:]})")
     else:
-        inline_used = os.getenv("COPILOT_INLINE_USED", "0.0%")
-        print(f"   - Autocomplete Usage:  {inline_used} Used (Unlimited)")
-        print("   - Engine Capacity:     Unlimited Real-Time Suggestions via GitHub")
-        print("   - Separate Codex Key:  Add OPENAI_API_KEY=sk-... to .env to track standalone OpenAI/Codex API")
+        print("   - Separate Codex Key:  Not Set (Add OPENAI_API_KEY=sk-... to .env to track OpenAI API account)")
+        print("   - OpenAI Dashboard:    https://platform.openai.com/usage")
 
 def get_github_username(token):
     """Fetch GitHub account username."""
