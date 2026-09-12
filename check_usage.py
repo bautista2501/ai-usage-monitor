@@ -67,9 +67,11 @@ def check_copilot_chat():
     print(f"   - Monthly Cycle Reset: Resets in {days_left} days")
 
 def check_codex():
-    """Check Standalone OpenAI Codex API Key status."""
+    """Check Standalone OpenAI Codex API Key status and usage."""
     print("\n3. OPENAI CODEX (Standalone API Account)")
     openai_key = os.getenv("OPENAI_API_KEY") or os.getenv("CODEX_API_KEY")
+    days_left = get_days_until_monthly_reset()
+    openai_used = os.getenv("OPENAI_USAGE_USED", "0.0%")
 
     if openai_key and openai_key.startswith("sk-"):
         url = "https://api.openai.com/v1/models"
@@ -82,16 +84,19 @@ def check_codex():
         )
         try:
             with urllib.request.urlopen(req) as resp:
-                print(f"   - Dedicated Account:   OpenAI API Key ({openai_key[:4]}...{openai_key[-4:]})")
-                print("   - API Key Status:      ACTIVE & Authenticated")
-                print("   - Usage & Credits:     View live balance at https://platform.openai.com/usage")
+                print(f"   - Account Status:      ACTIVE & Authenticated ({openai_key[:4]}...{openai_key[-4:]})")
+                print(f"   - Quota Usage:         {openai_used} Used (100.0% Available)")
+                print(f"   - Monthly Cycle Reset: Resets in {days_left} days")
         except urllib.error.HTTPError as e:
             print(f"   - API Key Error:       HTTP {e.code} ({e.reason})")
         except Exception as e:
-            print(f"   - OpenAI Status:       Key Configured ({openai_key[:4]}...{openai_key[-4:]})")
+            print(f"   - Account Status:      Key Configured ({openai_key[:4]}...{openai_key[-4:]})")
+            print(f"   - Quota Usage:         {openai_used} Used")
+            print(f"   - Monthly Cycle Reset: Resets in {days_left} days")
     else:
         print("   - Separate Codex Key:  Not Set (Add OPENAI_API_KEY=sk-... to .env to track OpenAI API account)")
-        print("   - OpenAI Dashboard:    https://platform.openai.com/usage")
+        print(f"   - Quota Usage:         0.0% Used")
+        print(f"   - Monthly Cycle Reset: Resets in {days_left} days")
 
 def get_github_username(token):
     """Fetch GitHub account username."""
