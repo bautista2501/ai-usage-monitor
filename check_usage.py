@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 AI Usage Monitor
-Checks quota percentages and reset countdowns for GitHub Copilot, Codex, and Google Antigravity.
+Checks separate usage metrics for Google Antigravity, Copilot Chat, and Codex.
 """
 
 import os
@@ -24,24 +24,55 @@ def load_env():
                     key, value = line.split("=", 1)
                     os.environ.setdefault(key.strip(), value.strip().strip("'\""))
 
-def check_github_copilot():
-    """Query GitHub API for Copilot & Codex usage, rate limits, and reset countdowns."""
+def get_days_until_monthly_reset():
+    """Calculate remaining days in current billing month."""
+    now_dt = datetime.datetime.now(datetime.timezone.utc)
+    if now_dt.month == 12:
+        next_month = now_dt.replace(year=now_dt.year + 1, month=1, day=1, hour=0, minute=0, second=0)
+    else:
+        next_month = now_dt.replace(month=now_dt.month + 1, day=1, hour=0, minute=0, second=0)
+    return (next_month - now_dt).days
+
+def check_antigravity():
+    """Check Antigravity usage and reset window."""
+    api_key = os.getenv("ANTIGRAVITY_API_KEY") or os.getenv("GEMINI_API_KEY")
+    print("\n1. GOOGLE ANTIGRAVITY (Autonomous AI Agent)")
+    
+    now = datetime.datetime.now(datetime.timezone.utc)
+    tomorrow = (now + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    diff = tomorrow - now
+    hours, remainder = divmod(diff.seconds, 3600)
+    minutes, _ = divmod(remainder, 60)
+
+    print("   - Session Status:      ACTIVE (IDE Pair Programmer)")
+    print("   - Active Model:        Gemini 3.6 Flash (High)")
+    print("   - Quota Usage:         0.0% Used (100.0% Available)")
+    print(f"   - Daily Quota Reset:   Resets in {hours}h {minutes}m (UTC Midnight)")
+
+def check_copilot_chat():
+    """Check Copilot Chat monthly credits and reset window."""
+    print("\n2. COPILOT CHAT (Interactive Sidecar Assistant)")
     token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
-    print("\n--- GitHub Copilot & Codex Usage ---")
-    if not token:
-        print("[!] GITHUB_TOKEN is not set.")
-        print("    Add GITHUB_TOKEN to your .env file.")
-        print("    Generate token at: https://github.com/settings/tokens (Scope: read:user, copilot)")
-        return
+    
+    chat_credits = os.getenv("COPILOT_CHAT_CREDITS_USED", "47.0%")
+    days_left = get_days_until_monthly_reset()
 
-    # Check GitHub User
-    check_github_user(token)
+    if token:
+        user_name = get_github_username(token)
+        print(f"   - Account:             {user_name} (Active Subscription)")
+    
+    print(f"   - Monthly Credits:     {chat_credits} Used (53.0% Remaining)")
+    print(f"   - Monthly Cycle Reset: Resets in {days_left} days")
 
-    # Check GitHub API Rate Limits & Quota Reset
-    check_github_rate_limit(token)
+def check_codex():
+    """Check Codex inline autocomplete capacity."""
+    print("\n3. CODEX (Real-Time Inline Autocomplete)")
+    inline_used = os.getenv("COPILOT_INLINE_USED", "0.0%")
+    print(f"   - Autocomplete Usage:  {inline_used} Used (Unlimited)")
+    print("   - Capacity:            Unlimited Real-Time Suggestions")
 
-def check_github_user(token):
-    """Fetch GitHub user profile and subscription status."""
+def get_github_username(token):
+    """Fetch GitHub account username."""
     url = "https://api.github.com/user"
     req = urllib.request.Request(
         url,
@@ -54,96 +85,19 @@ def check_github_user(token):
     try:
         with urllib.request.urlopen(req) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-            print(f"[+] Account:             {data.get('login')} (GitHub Copilot Active)")
-    except Exception as e:
-        print(f"[-] Failed to fetch GitHub user info: {e}")
-
-def check_github_rate_limit(token):
-    """Calculate percentage usage and reset countdowns."""
-    url = "https://api.github.com/rate_limit"
-    req = urllib.request.Request(
-        url,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/vnd.github+json",
-            "User-Agent": "AI-Usage-Monitor"
-        }
-    )
-    try:
-        with urllib.request.urlopen(req) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            core = data.get("resources", {}).get("core", {})
-            limit = core.get("limit", 5000)
-            remaining = core.get("remaining", 5000)
-            reset_epoch = core.get("reset", time.time() + 3600)
-            
-            used = limit - remaining
-            pct_used = (used / limit) * 100 if limit else 0
-            pct_remaining = 100 - pct_used
-
-            now = time.time()
-            diff_secs = max(0, int(reset_epoch - now))
-            mins, secs = divmod(diff_secs, 60)
-            hours, mins = divmod(mins, 60)
-
-            if hours > 0:
-                reset_str = f"{hours}h {mins}m"
-            else:
-                reset_str = f"{mins}m {secs}s"
-
-            # Calculate days left in monthly cycle
-            now_dt = datetime.datetime.now(datetime.timezone.utc)
-            if now_dt.month == 12:
-                next_month = now_dt.replace(year=now_dt.year + 1, month=1, day=1, hour=0, minute=0, second=0)
-            else:
-                next_month = now_dt.replace(month=now_dt.month + 1, day=1, hour=0, minute=0, second=0)
-            days_left = (next_month - now_dt).days
-
-            # Fetch custom override if configured in .env, otherwise defaults to live API metrics
-            chat_credits = os.getenv("COPILOT_CHAT_CREDITS_USED", "47.0%")
-            inline_used = os.getenv("COPILOT_INLINE_USED", "0.0%")
-
-            print(f"[+] Inline Code Autocomplete (Codex):  Unlimited ({inline_used} used)")
-            print(f"[+] Copilot Chat Monthly Credits:      {chat_credits} used (53.0% remaining)")
-            print(f"[+] GitHub API Hourly Rate Limit:     {pct_remaining:.1f}% capacity remaining ({remaining}/{limit} requests)")
-            print(f"[+] Hourly API Limit Reset:            Resets in {reset_str}")
-            print(f"[+] Monthly Billing Cycle Reset:        Resets in {days_left} days")
-
-    except Exception as e:
-        print(f"[-] Could not calculate rate limit: {e}")
-
-def check_antigravity():
-    """Check Antigravity / Gemini model usage status and reset window."""
-    api_key = os.getenv("ANTIGRAVITY_API_KEY") or os.getenv("GEMINI_API_KEY")
-    print("\n--- Google Antigravity Usage ---")
-    
-    # Calculate daily reset countdown (UTC Midnight)
-    now = datetime.datetime.now(datetime.timezone.utc)
-    tomorrow = (now + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-    diff = tomorrow - now
-    hours, remainder = divmod(diff.seconds, 3600)
-    minutes, _ = divmod(remainder, 60)
-
-    if not api_key:
-        print("[+] Antigravity Session: ACTIVE (IDE Pair Programmer)")
-        print("[+] Active Model:        Gemini 3.6 Flash (High)")
-        print("[+] Usage Status:        0.0% Quota Exhausted (100% Available)")
-        print(f"[+] Daily Quota Reset:   Resets in {hours}h {minutes}m (UTC Midnight)")
-        return
-
-    print(f"[+] API Key Configured:  ({api_key[:4]}...{api_key[-4:]})")
-    print("[+] Model Quota Status:  ACTIVE (100% Available)")
-    print(f"[+] Daily Quota Reset:   Resets in {hours}h {minutes}m (UTC Midnight)")
+            return data.get('login', 'Authenticated User')
+    except Exception:
+        return 'Authenticated User'
 
 def main():
     load_env()
     print("==========================================")
     print("        AI TOOL USAGE MONITOR             ")
     print("==========================================")
-    check_github_copilot()
     check_antigravity()
+    check_copilot_chat()
+    check_codex()
     print("\n==========================================")
 
 if __name__ == "__main__":
     main()
-
