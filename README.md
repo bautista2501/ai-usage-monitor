@@ -37,11 +37,21 @@ A standalone command-line tool to check remaining usage and quota for **GitHub C
      ```
 
 ### Optional: Git Bash Alias Setup
-Create a quick shortcut to run `ai-usage` from any folder in Git Bash:
+Create quick shortcuts to run `ai-usage` and `sys-health` from any folder in Git Bash:
 ```bash
 echo "alias ai-usage='python /c/Users/leste/apps/ai-usage-monitor/check_usage.py'" >> ~/.bashrc
+echo "alias sys-health='bash /c/Users/leste/apps/ai-usage-monitor/check_system_health.sh'" >> ~/.bashrc
 source ~/.bashrc
 ```
+
+---
+
+## Scripts Included
+
+| Script | Command / Alias | Description |
+| :--- | :--- | :--- |
+| `check_usage.py` | `ai-usage` | Checks percentage usage, remaining capacity, and reset timers for Antigravity, Copilot Chat, and Codex. |
+| `check_system_health.sh` | `sys-health` | Scans operational provider status, GitHub API speedometer, RAM, and active Docker containers. |
 
 ## Quota Mapping
 
