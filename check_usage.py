@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 AI Usage Monitor
-Checks separate usage metrics for Google Antigravity, Copilot Chat, and Codex.
+Checks separate usage metrics for Google Antigravity, Copilot Chat, and Codex / OpenAI API.
 """
 
 import os
@@ -65,11 +65,33 @@ def check_copilot_chat():
     print(f"   - Monthly Cycle Reset: Resets in {days_left} days")
 
 def check_codex():
-    """Check Codex inline autocomplete capacity."""
+    """Check Codex API Key / OpenAI subscription or GitHub Codex engine capacity."""
     print("\n3. CODEX (Real-Time Inline Autocomplete)")
-    inline_used = os.getenv("COPILOT_INLINE_USED", "0.0%")
-    print(f"   - Autocomplete Usage:  {inline_used} Used (Unlimited)")
-    print("   - Capacity:            Unlimited Real-Time Suggestions")
+    openai_key = os.getenv("OPENAI_API_KEY") or os.getenv("CODEX_API_KEY")
+
+    if openai_key and openai_key.startswith("sk-"):
+        url = "https://api.openai.com/v1/models"
+        req = urllib.request.Request(
+            url,
+            headers={
+                "Authorization": f"Bearer {openai_key}",
+                "User-Agent": "AI-Usage-Monitor"
+            }
+        )
+        try:
+            with urllib.request.urlopen(req) as resp:
+                print(f"   - Dedicated Account:   OpenAI API Key ({openai_key[:4]}...{openai_key[-4:]})")
+                print("   - API Key Status:      ACTIVE & Authenticated")
+                print("   - Usage & Credits:     View live balance at https://platform.openai.com/usage")
+        except urllib.error.HTTPError as e:
+            print(f"   - API Key Error:       HTTP {e.code} ({e.reason})")
+        except Exception as e:
+            print(f"   - OpenAI Status:       Key Configured ({openai_key[:4]}...{openai_key[-4:]})")
+    else:
+        inline_used = os.getenv("COPILOT_INLINE_USED", "0.0%")
+        print(f"   - Autocomplete Usage:  {inline_used} Used (Unlimited)")
+        print("   - Engine Capacity:     Unlimited Real-Time Suggestions via GitHub")
+        print("   - Separate Codex Key:  Add OPENAI_API_KEY=sk-... to .env to track standalone OpenAI/Codex API")
 
 def get_github_username(token):
     """Fetch GitHub account username."""
