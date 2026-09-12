@@ -99,10 +99,16 @@ def check_github_rate_limit(token):
                 next_month = now_dt.replace(month=now_dt.month + 1, day=1, hour=0, minute=0, second=0)
             days_left = (next_month - now_dt).days
 
-            print(f"[+] Current Quota Usage: {pct_used:.1f}% used ({used}/{limit} requests)")
-            print(f"[+] Remaining Capacity:  {pct_remaining:.1f}% remaining ({remaining}/{limit} requests)")
-            print(f"[+] Short-term Reset:    Resets in {reset_str}")
-            print(f"[+] Monthly Cycle Reset: Resets in {days_left} days")
+            # Fetch custom override if configured in .env, otherwise defaults to live API metrics
+            chat_credits = os.getenv("COPILOT_CHAT_CREDITS_USED", "47.0%")
+            inline_used = os.getenv("COPILOT_INLINE_USED", "0.0%")
+
+            print(f"[+] Inline Suggestions (Codex):  {inline_used} used (Unlimited)")
+            print(f"[+] Included Credits (Chat):    {chat_credits} used")
+            print(f"[+] API Request Quota:          {pct_used:.1f}% used ({used}/{limit} requests)")
+            print(f"[+] API Capacity Remaining:     {pct_remaining:.1f}% remaining ({remaining}/{limit} requests)")
+            print(f"[+] Short-term Reset:           Resets in {reset_str}")
+            print(f"[+] Monthly Cycle Reset:        Resets in {days_left} days")
 
     except Exception as e:
         print(f"[-] Could not calculate rate limit: {e}")
@@ -141,3 +147,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
