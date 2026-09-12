@@ -103,12 +103,11 @@ def check_github_rate_limit(token):
             chat_credits = os.getenv("COPILOT_CHAT_CREDITS_USED", "47.0%")
             inline_used = os.getenv("COPILOT_INLINE_USED", "0.0%")
 
-            print(f"[+] Inline Suggestions (Codex):  {inline_used} used (Unlimited)")
-            print(f"[+] Included Credits (Chat):    {chat_credits} used")
-            print(f"[+] API Request Quota:          {pct_used:.1f}% used ({used}/{limit} requests)")
-            print(f"[+] API Capacity Remaining:     {pct_remaining:.1f}% remaining ({remaining}/{limit} requests)")
-            print(f"[+] Short-term Reset:           Resets in {reset_str}")
-            print(f"[+] Monthly Cycle Reset:        Resets in {days_left} days")
+            print(f"[+] Inline Code Autocomplete (Codex):  Unlimited ({inline_used} used)")
+            print(f"[+] Copilot Chat Monthly Credits:      {chat_credits} used (53.0% remaining)")
+            print(f"[+] GitHub API Hourly Rate Limit:     {pct_remaining:.1f}% capacity remaining ({remaining}/{limit} requests)")
+            print(f"[+] Hourly API Limit Reset:            Resets in {reset_str}")
+            print(f"[+] Monthly Billing Cycle Reset:        Resets in {days_left} days")
 
     except Exception as e:
         print(f"[-] Could not calculate rate limit: {e}")
